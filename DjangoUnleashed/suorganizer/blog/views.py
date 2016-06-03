@@ -1,4 +1,5 @@
-from django.shortcuts import ( get_object_or_404, render)
+from django.shortcuts import ( 
+	get_object_or_404, render)
 
 from django.views.decorators.http import \
 	require_http_methods
@@ -20,7 +21,7 @@ def post_detail(request, year, month,
 		'parent_template': parent_template})
 
 class PostList(View):
-	template_name = 'blog/post_list.html'
+	template_name = ''
 
 	def get(self, request):
 		return render(
