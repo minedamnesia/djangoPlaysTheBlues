@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block logged_in_nav %}
+{% if not has_blog %}
+	<li><a href="{% url "new-blog" %}">Create New Blog</a></li>
+{% else %}
+	<li><a href="">Edit Blog Settings</a></li>
+{% endif %}
+
+{% endblock %}
