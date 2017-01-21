@@ -8,8 +8,8 @@ from django.contrib.auth.decorators import login_required
 from django.views.generic import CreateView
 from django.views.generic import TemplateView
 from django.views.generic import UpdateView
-from blog.forms import BlogForm
-from blog.models import Blog
+from blog.forms import BlogForm, BlogPostForm
+from blog.models import Blog, BlogPost
 
 class NewBlogView(CreateView):
 	form_class = BlogForm
@@ -40,7 +40,10 @@ class HomeView(TemplateView):
 		if self.request.user.is_authenticated():
 			if Blog.objects.filter(owner=self.request.user).exists():
 				ctx['has_blog'] = True
-				ctx['blog'] = Blog.objects.get(owner=self.request.user)
+				blog = Blog.objects.get(owner=self.request.user)
+
+				ctx['blog'] = blog
+				ctx['blog_posts'] = BlogPost.objects.filter(blog=blog)
 
 		return ctx
 
@@ -54,3 +57,20 @@ class UpdateBlogView(UpdateView) :
 	def dispatch(self, request, *args, **kwargs) :
 		return super(UpdateBlogView, self).dispatch(request, *args, **kwargs)
 
+class NewBlogPostView(CreateView):
+	form_class = BlogPostForm
+	template_name = 'blog_post.html'
+
+	@method_decorator(login_required)
+	def dispatch(self,request, *args, **kwargs):
+		return super(NewBlogPostView, self).dispatch(request, *args, **kwargs)
+
+	def form_valid(self,form):
+		blog_post_obj = form.save(commit=False)
+		blog_post_obj.blog = Blog.objects.get(owner=self.request.user)
+		blog_post_obj.slug = slugify(blog_post_obj.title)
+		blog_post_obj.is_published = True
+
+		blog_post_obj.save()
+
+		return HttpResponseRedirect(reverse('home'))
