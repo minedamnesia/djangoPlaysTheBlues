@@ -3,10 +3,11 @@ from django.core.urlresolvers import reverse
 from django.http.response import HttpResponseRedirect
 from django.http.response import HttpResponseForbidden
 from django.utils.text import slugify
-from django.views.generic import CreateView
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
+from django.views.generic import CreateView
 from django.views.generic import TemplateView
+from django.views.generic import UpdateView
 from blog.forms import BlogForm
 from blog.models import Blog
 
@@ -37,6 +38,19 @@ class HomeView(TemplateView):
 		ctx = super(HomeView, self).get_context_data(**kwargs)
 
 		if self.request.user.is_authenticated():
-			ctx['has_blog'] = Blog.objects.filter(owner=self.request.user).exists()
+			if Blog.objects.filter(owner=self.request.user).exists():
+				ctx['has_blog'] = True
+				ctx['blog'] = Blog.objects.get(owner=self.request.user)
 
 		return ctx
+
+class UpdateBlogView(UpdateView) :
+	form_class = BlogForm
+	template_name = 'blog_settings.html'
+	success_url = '/'
+	model = Blog
+
+	method_decorator(login_required)
+	def dispatch(self, request, *args, **kwargs) :
+		return super(UpdateBlogView, self).dispatch(request, *args, **kwargs)
+
