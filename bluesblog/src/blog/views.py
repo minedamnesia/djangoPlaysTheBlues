@@ -75,7 +75,8 @@ class NewBlogPostView(CreateView):
 		return HttpResponseRedirect(reverse('home'))
 
 class BlogPostDetailsView(DetailView):
-	model = BlogPosttemplate_name = 'blog_post_details.html'
+	model = BlogPost
+	template_name = 'blog_post_details.html'
 
 class UpdateBlogPostView(UpdateView):
 	form_class = BlogPostForm
