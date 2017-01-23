@@ -5,9 +5,7 @@ from django.http.response import HttpResponseForbidden
 from django.utils.text import slugify
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
-from django.views.generic import CreateView
-from django.views.generic import TemplateView
-from django.views.generic import UpdateView
+from django.views.generic import CreateView,TemplateView, UpdateView, DetailView, View
 from blog.forms import BlogForm, BlogPostForm
 from blog.models import Blog, BlogPost
 
@@ -44,6 +42,7 @@ class HomeView(TemplateView):
 
 				ctx['blog'] = blog
 				ctx['blog_posts'] = BlogPost.objects.filter(blog=blog)
+				ctx['shared_posts'] = blog.shared_posts.all()
 
 		return ctx
 
@@ -74,3 +73,72 @@ class NewBlogPostView(CreateView):
 		blog_post_obj.save()
 
 		return HttpResponseRedirect(reverse('home'))
+
+class BlogPostDetailsView(DetailView):
+	model = BlogPosttemplate_name = 'blog_post_details.html'
+
+class UpdateBlogPostView(UpdateView):
+	form_class = BlogPostForm
+	template_name = 'blog_post.html'
+	success_url = '/'
+	model = BlogPost
+
+	@method_decorator(login_required)
+	def dispatch(self, request, *args, **kwargs):
+		return super(UpdateBlogPostView, self).dispatch(request, *args, **kwargs)
+
+	def get_queryset(self):
+		queryset = super(UpdateBlogPostView, self).get_queryset()
+		return queryset.filter(blog__owner=self.request.user)
+
+
+class ShareBlogPostView(TemplateView):
+	template_name = 'share_blog_post.html'
+
+	@method_decorator(login_required)
+	def dispatch(self, request, *args, **kwargs):
+		return super(ShareBlogPostView, self).dispatch(request,*args, **kwargs)
+
+		def get_context_data(self,pk,**kwargs):
+			blog_post = BlogPost.objects.get(pk=pk)
+			currently_shared_with = blog_post.shared_to.all()
+			currently_shared_with_ids = map(lambda x: x.pk, currently_shared_with)
+			exclude_from_can_share_list = (blog_post.blog.pk) + list(currently_shared_with_ids)
+
+			return {
+				'post':blog_post,
+				'is_shared_with': currently_shared_with,
+				'can_be_shared_with': can_be_shared_with
+			}
+
+
+class SharePostWithBlog(View):
+	@method_decorator(login_required)
+	def dispatch(self, request, *args, **kwargs):
+		return super(SharePostWithBlog, self).dispatch(request, *args, **kwargs)
+
+	def get(self, request, post_pk, blog_pk):
+		blog_post = BlogPost.objects.get(pk=post_pk)
+		if blog_post.blog.owner != request.user:
+			return HttpResponseForbidden('You can only share posts that you created')
+
+		blog = Blog.objects.get(pk=blog_pk)
+		blog_post.shared_to.add(blog)
+
+		return HttpResponseRedirect(reverse('home'))
+
+
+class StopSharingPostWithBlog(View):
+	@method_decorator(login_required)
+	def dispatch(self, request, *args, **kwargs):
+		return super(StopSharingPostWithBlog, self).dispatch(request, *args, **kwargs)
+
+		def get(self,request, post_pk, blog_pk):
+			blog_post = BlogPost.objects.get(pk=post_pk)
+			if blog_post.blog.owner != request.user:
+				return HttpResponseForbidden('You can only stop sharing posts that you created')
+
+			blog = Blog.objects.get(pk=blog_pk)
+			blog_post = shared_to.remove(blog)
+
+			return HttpResponseRedirect(reverse('home'))

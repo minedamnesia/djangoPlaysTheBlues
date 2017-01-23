@@ -17,3 +17,4 @@ class BlogPost(models.Model):
 	is_published = models.BooleanField(default=False)
 
 	slug = models.SlugField(max_length=500, editable=False)
+	shared_to = models.ManyToManyField(Blog, related_name='shared_posts')
