@@ -105,6 +105,7 @@ class ShareBlogPostView(TemplateView):
 			currently_shared_with = blog_post.shared_to.all()
 			currently_shared_with_ids = map(lambda x: x.pk, currently_shared_with)
 			exclude_from_can_share_list = (blog_post.blog.pk) + list(currently_shared_with_ids)
+			can_be_shared_with = Blog.objects.exclude(pk__in=exclude_from_can_share_list)
 
 			return {
 				'post':blog_post,

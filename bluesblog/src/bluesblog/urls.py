@@ -17,7 +17,7 @@ urlpatterns = [
     url(r'^blog/post/new/$', NewBlogPostView.as_view(), name='new-blog-post'),
     url(r'^blog/post/(?P<pk>\d+)/$', BlogPostDetailsView.as_view(), name='blog-post-details'),
     url(r'^blog/post/(?P<pk>\d+)/update/$', UpdateBlogPostView.as_view(), name='update-blog-post'),
-    url(r'^blog/post/(?P<pk>\d+)/share/$', SharePostWithBlog.as_view(), name='share-blog-post-with-blog'),
+    url(r'^blog/post/(?P<pk>\d+)/share/$', ShareBlogPostView.as_view(), name='share-blog-post-with-blog'),
     url(r'^blog/post/(?P<post_pk>\d+)/share/to/(?P<blog_pk>\d+)/$',SharePostWithBlog.as_view(), name='share-post-with-blog'),
     url(r'^blog/post/(?P<post_pk>\d+)/stop/share/to/(?P<blog_pk>\d+)/$', StopSharingPostWithBlog.as_view(), name='stop-sharing-post-with-blog'),
 ]
