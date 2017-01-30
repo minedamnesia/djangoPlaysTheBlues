@@ -100,18 +100,13 @@ class ShareBlogPostView(TemplateView):
 	def dispatch(self, request, *args, **kwargs):
 		return super(ShareBlogPostView, self).dispatch(request,*args, **kwargs)
 
-		def get_context_data(self,pk,**kwargs):
-			blog_post = BlogPost.objects.get(pk=pk)
-			currently_shared_with = blog_post.shared_to.all()
-			currently_shared_with_ids = map(lambda x: x.pk, currently_shared_with)
-			exclude_from_can_share_list = (blog_post.blog.pk) + list(currently_shared_with_ids)
-			can_be_shared_with = Blog.objects.exclude(pk__in=exclude_from_can_share_list)
-
-			return {
-				'post':blog_post,
-				'is_shared_with': currently_shared_with,
-				'can_be_shared_with': can_be_shared_with
-			}
+	def get_context_data(self,pk,**kwargs):
+		blog_post = BlogPost.objects.get(pk=pk)
+		currently_shared_with = blog_post.shared_to.all()
+		currently_shared_with_ids = map(lambda x: x.pk, currently_shared_with)
+	   	exclude_from_can_share_list = [blog_post.blog.pk] + list(currently_shared_with_ids) 
+	   	can_be_shared_with = Blog.objects.exclude(pk__in=exclude_from_can_share_list)
+	   	return { 'post': blog_post, 'is_shared_with': currently_shared_with, 'can_be_shared_with': can_be_shared_with}
 
 
 class SharePostWithBlog(View):
@@ -123,7 +118,7 @@ class SharePostWithBlog(View):
 		blog_post = BlogPost.objects.get(pk=post_pk)
 		if blog_post.blog.owner != request.user:
 			return HttpResponseForbidden('You can only share posts that you created')
-
+		
 		blog = Blog.objects.get(pk=blog_pk)
 		blog_post.shared_to.add(blog)
 

@@ -16,9 +16,7 @@
 <h2>Blog Posts</h2>
 <ul>
 	{% for post in blog_posts %}
-	<li><a href="{% url 'blog-post-details' pk=post.pk %}">{{ post.title }}</a></li>
-	<li><a href="{% url "update-blog-post" pk=post.pk %}">Edit Post</a></li>
-	<li><a href="{% url "share-blog-post-with-blog" pk=post.pk %}">Share Post</a></li>
+		<li><a href="{% url 'blog-post-details' pk=post.pk %}">{{ post.title }}</a> | <a href="{% url "update-blog-post" pk=post.pk %}">Edit Post</a> | <a href="{% url "share-blog-post-with-blog" pk=post.pk %}">Share Post</a></li>
 	{% endfor %}
 </ul>
 {% endif %}
